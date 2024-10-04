@@ -1,8 +1,8 @@
-from products import Product  # Import Product class
-from store import Store  # Import Store class
+from products import Product
+from store import Store
 
-# Setup initial stock of inventory
 def create_default_inventory():
+    """Initial stock of inventory"""
     product_list = [
         Product("MacBook Air M2", price=1450, quantity=100),
         Product("Bose QuietComfort Earbuds", price=250, quantity=500),
@@ -11,8 +11,9 @@ def create_default_inventory():
     best_buy = Store(product_list)
     return best_buy
 
-# Function to display the store menu
+
 def start(store):
+    """Store Menu Displqy"""
     while True:
         print("**********\nStore Menu:\n__________")
         print("1. List all products in store")
@@ -48,7 +49,8 @@ def start(store):
 
                 product_choice = input("\nEnter the number of the product you would like to order (Enter empty text to finish): ")
 
-                if not product_choice:  # If user enters empty input, finish the order process
+                """If user enters empty input, finish the order process"""
+                if not product_choice:
                     break
 
                 try:
@@ -97,12 +99,11 @@ def start(store):
         else:
             print("Invalid choice, please try again.")
 
-# Main function to run the program
+
 def main():
-    # Create the default inventory and store
+    """Creates the inventory and store"""
     best_buy = create_default_inventory()
 
-    # Start the store menu
     start(best_buy)
 
 if __name__ == "__main__":
