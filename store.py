@@ -1,3 +1,4 @@
+from products import NonStockedProduct
 class Store:
     def __init__(self, products=None):
         if products is None:
@@ -21,13 +22,13 @@ class Store:
         return [product for product in self.products if product.is_active()]
 
 
-    def order(self, shopping_list) -> float:
-        total_price = 0
+    def order(self, shopping_list):
+        total_price = 0.0
         for product, quantity in shopping_list:
-            if product in self.products and product.is_active():
-                total_price += product.buy(quantity)
+            # For NonStockedProduct, you don't need to adjust quantity or check stock
+            if isinstance(product, NonStockedProduct):
+                total_price += product.price * quantity  # Only the price matters
             else:
-                raise ValueError(f"Product {product.name} is currently unavailable.")
-
+                total_price += product.buy(quantity)  # For other products, handle normally
         return total_price
 
