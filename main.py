@@ -46,7 +46,6 @@ def start(store):
             total_quantity = store.get_total_quantity()
             print(f"\nTotal amount of products in store: {total_quantity}")
 
-
         elif choice == '3':
             print("\nMaking an order:")
             products = store.get_all_products()
@@ -146,8 +145,6 @@ def start(store):
                 total_price = store.order(shopping_list)
 
                 print(f"__________\nTotal price for the order: {total_price} $.")
-
-
 
         elif choice == '4':
             print("Best Buy says Goodbye!")
