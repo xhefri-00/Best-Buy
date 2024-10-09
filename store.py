@@ -23,21 +23,33 @@ class Store:
         added_products = {}  # Track quantities for NonStockedProducts
 
         for product, quantity in shopping_list:
-            if isinstance(product, NonStockedProduct):
-                if product in added_products:
-                    print(f"You already have {added_products[product]} of {product.name} in the cart. Quantity is not limited for non-stocked products.")
-                else:
-                    total_price += product.price * quantity  # Only the price matters
-                    added_products[product] = quantity  # Track the quantity in the cart
+            # Apply promotion if it exists
+            if product.promotion:
+                discounted_price = product.promotion.apply_promotion(product, quantity)
+                total_price += discounted_price
+                print(f"Applied 30% OFF promotion on {product.name}. Discounted total for {quantity} is: {discounted_price:.2f} $.")
             else:
-                # Check stock for regular products
-                remaining_quantity = product.get_quantity()
-                if remaining_quantity < quantity:
-                    print(f"The order for {product.name} cannot exceed inventory. There are only {remaining_quantity} left.")
-                    continue  # Skip this product if not enough stock
-                total_price += product.buy(quantity)  # For other products, handle normally
+                if isinstance(product, NonStockedProduct):
+                    if product in added_products:
+                        print(
+                            f"You already have {added_products[product]} of {product.name} in the cart. Quantity is not limited for non-stocked products.")
+                    else:
+                        total_price += product.price * quantity  # Only the price matters
+                        added_products[product] = quantity  # Track the quantity in the cart
+                else:
+                    # Check stock for regular products
+                    remaining_quantity = product.get_quantity()
+                    if remaining_quantity < quantity:
+                        print(
+                            f"The order for {product.name} cannot exceed inventory. There are only {remaining_quantity} left.")
+                        continue  # Skip this product if not enough stock
+                    total_price += product.buy(quantity)  # For other products, handle normally
 
         return total_price
+
+
+
+
 
 
 

@@ -1,14 +1,26 @@
-from products import Product, NonStockedProduct, LimitedProduct
+from products import Product, NonStockedProduct, LimitedProduct, SecondHalfPrice, ThirdOneFree, PercentDiscount
 from store import Store
 
 def create_default_inventory():
     """Initial stock of inventory"""
-    product_list = [Product("MacBook Air M2", price=1450, quantity=100),
-                    Product("Bose QuietComfort Earbuds", price=250, quantity=500),
-                    Product("Google Pixel 7", price=500, quantity=250),
-                    NonStockedProduct("Windows License", price=125),
-                    LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
-                    ]
+    product_list = [
+        Product("MacBook Air M2", price=1450, quantity=100),
+        Product("Bose QuietComfort Earbuds", price=250, quantity=500),
+        Product("Google Pixel 7", price=500, quantity=250),
+        NonStockedProduct("Windows License", price=125),
+        LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
+    ]
+
+    # Create promotion catalog
+    second_half_price = SecondHalfPrice("Second Half Price!")  # No import needed
+    third_one_free = ThirdOneFree("Third One Free!")            # No import needed
+    thirty_percent = PercentDiscount("30% Off!", percent=30)    # No import needed
+
+    # Add promotions to products using the promotion setter
+    product_list[0].promotion = second_half_price  # Set promotion directly
+    product_list[1].promotion = third_one_free  # Set promotion directly
+    product_list[3].promotion = thirty_percent  # Set promotion directly
+
     best_buy = Store(product_list)
     return best_buy
 
@@ -149,7 +161,6 @@ def main():
     """Creates the inventory and store"""
     best_buy = create_default_inventory()
     start(best_buy)
-
 
 if __name__ == "__main__":
     main()
