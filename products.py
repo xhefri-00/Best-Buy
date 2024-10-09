@@ -7,22 +7,26 @@ class Promotion:
 
 
 class SecondHalfPrice(Promotion):
+    """promo for 2nd product half price"""
     def apply_promotion(self, product, quantity) -> float:
         # Assuming this promotion applies to the entire quantity
         return (product.price / 2) * quantity
 
 
 class ThirdOneFree(Promotion):
+    """promo for the 3rd item for free"""
     def apply_promotion(self, product, quantity) -> float:
-        free_units = quantity // 3  # Get the number of free items
+        free_units = quantity // 3  # Gets the number of free items
         total_units_to_pay = quantity - free_units
         return product.price * total_units_to_pay
 
 
 class PercentDiscount(Promotion):
+    """ % off discount"""
     def __init__(self, name: str, percent: float):
         super().__init__(name)
         self.percent = percent
+
 
     def apply_promotion(self, product, quantity) -> float:
         return (product.price * (1 - self.percent / 100)) * quantity
@@ -45,28 +49,34 @@ class Product:
         self.price = price
         self.quantity = quantity
         self.active = is_non_stocked or quantity > 0  # Always active if non-stocked
-        self.promotion = None  # Initialize promotion to None
+        self.promotion = None  # Initializes promotion to None
+
 
     def get_quantity(self) -> int:
         """gets quantity"""
         return self.quantity
 
+
     def set_quantity(self, quantity: int):
         """sets the quantity"""
         self.quantity = quantity
-        self._update_active_status()  # Call the helper method to check if it needs to be deactivated
+        self._update_active_status()
+
 
     def is_active(self) -> bool:
         """checks that its active"""
         return self.active
 
+
     def activate(self):
         """activates products"""
         self.active = True
 
+
     def deactivate(self):
         """deactivates products"""
         self.active = False
+
 
     def _update_active_status(self):
         """method to deactivate if quantity is 0"""
@@ -75,9 +85,12 @@ class Product:
         else:
             self.activate()
 
+
     def show(self) -> str:
+        """to show the promotion of each product"""
         promotion_info = f", Promotion: {self.promotion.name}" if self.promotion else ""
         return f"{self.name}, Price: {self.price:.2f}{promotion_info}, Quantity: {self.quantity}"
+
 
     def buy(self, quantity: int) -> float:
         """Calculate the total price after applying any promotions."""
@@ -91,14 +104,14 @@ class Product:
             return discounted_price
 
         self.quantity -= quantity
-        self._update_active_status()  # Reuse the helper method to check for deactivation
+        self._update_active_status()
         return self.price * quantity
 
 
 class NonStockedProduct(Product):
     """Non-Stocked Product class"""
     def __init__(self, name: str, price: float):
-        super().__init__(name, price, quantity=0, is_non_stocked=True)  # Set quantity to 0 and mark as non-stocked
+        super().__init__(name, price, quantity=0, is_non_stocked=True)   #quantity to 0 and mark as non-stocked
 
     def show(self) -> str:
         return f"{self.name} (Non-Stocked), Price: {self.price}, Quantity: not specified"
@@ -110,11 +123,13 @@ class LimitedProduct(Product):
         super().__init__(name, price, quantity)
         self.maximum = maximum
 
+
     def buy(self, quantity: int) -> float:
         """Check if the quantity exceeds the maximum allowed per order"""
         if quantity > self.maximum:
             raise ValueError(f"Cannot purchase more than {self.maximum} of {self.name}.")
         return super().buy(quantity)
+
 
     def show(self) -> str:
         """Indicate the maximum purchase limit"""
