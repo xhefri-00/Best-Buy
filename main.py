@@ -34,7 +34,6 @@ def start(store):
             total_quantity = store.get_total_quantity()
             print(f"\nTotal amount of products in store: {total_quantity}")
 
-
         elif choice == '3':
             print("\nMaking an order:")
             products = store.get_all_products()
@@ -43,20 +42,19 @@ def start(store):
                 continue
 
             shopping_list = []
+            shipping_added = False  #Before any products are added, shipping hasn't been selected.
 
             while True:
                 print("\nAvailable Products:")
                 for idx, product in enumerate(products, 1):
                     print(f"{idx}. {product.show()}")
-
                 product_choice = input("\nEnter the number of the product you would like to order (Enter empty text to finish): ")
-                #If user enters empty input, finish the order process
+                # If user enters empty input, finish the order process
                 if not product_choice:
                     break
 
                 try:
                     product_choice = int(product_choice)
-
                     if 1 <= product_choice <= len(products):
                         product = products[product_choice - 1]
 
@@ -73,10 +71,17 @@ def start(store):
                     continue
 
                 if isinstance(product, LimitedProduct):
+                    # Prevent the user from adding the shipping product again
+                    if shipping_added:
+                        print("Shipping has already been added to your order.")
+                        continue
                     # Automatically add LimitedProduct (like Shipping) with a quantity of 1
+
                     shopping_list.append((product, 1))  # Add it as 1 since it's limited
+                    shipping_added = True  # Setting shipping to True to prevent adding again
+
                     print(f"Product {product.name} added to list!")
-                    continue  # Skip to the next product selection
+                    continue  # continue product selection
 
                 elif isinstance(product, NonStockedProduct):
                     # Handle NonStockedProduct and allow user to specify the quantity
@@ -85,16 +90,12 @@ def start(store):
                             quantity = int(input(f"What amount would you like for {product.name}? "))
                             if quantity < 0:
                                 raise ValueError("The amount cannot be a negative number.")
-                                shopping_list.append((product, quantity))
-                                print(f"Product {product.name} added to list!")
-                                break
-
                             shopping_list.append((product, quantity))  # Add specified quantity
                             print(f"Product {product.name} added to list!")
                             break
 
-                        except ValueError:
-                            print("Please enter a valid number for quantity.")
+                        except ValueError as e:
+                            print(e)  # Print the error message
 
                 else:
                     # For regular stocked products
@@ -105,6 +106,7 @@ def start(store):
                                 raise ValueError("The amount cannot be a negative number.")
                             if quantity == 0:
                                 print("Okay, order was not placed.")
+                                break
 
                             if quantity > product.get_quantity():
                                 print(f"Unfortunately, we currently have {product.get_quantity()} in stock.")
@@ -118,8 +120,8 @@ def start(store):
                                 print(f"Product {product.name} added to list!")
                                 break
 
-                        except ValueError:
-                            print("Please enter a valid number for quantity.")
+                        except ValueError as e:
+                            print(e)  # Print the error message
 
             if shopping_list:
                 total_price = store.order(shopping_list)
@@ -136,8 +138,8 @@ def start(store):
 def main():
     """Creates the inventory and store"""
     best_buy = create_default_inventory()
-
     start(best_buy)
+
 
 if __name__ == "__main__":
     main()
