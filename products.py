@@ -10,7 +10,6 @@ class Product:
         if quantity < 0 and not is_non_stocked:
             raise ValueError("Product quantity cannot be negative.")
 
-
         self.name = name
         self.price = price
         self.quantity = quantity
@@ -75,18 +74,19 @@ class NonStockedProduct(Product):
         return f"{self.name} (Non-Stocked), Price: {self.price}, Quantity: not specified"
 
 
-
 class LimitedProduct(Product):
     """Limited Quantity Product class"""
     def __init__(self, name: str, price: float, quantity: int, maximum: int):
         super().__init__(name, price, quantity)
         self.maximum = maximum
 
+
     def buy(self, quantity: int) -> float:
         """Check if the quantity exceeds the maximum allowed per order"""
         if quantity > self.maximum:
             raise ValueError(f"Cannot purchase more than {self.maximum} of {self.name}.")
         return super().buy(quantity)
+
 
     def show(self) -> str:
         """Indicate the maximum purchase limit"""

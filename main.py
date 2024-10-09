@@ -34,30 +34,39 @@ def start(store):
             total_quantity = store.get_total_quantity()
             print(f"\nTotal amount of products in store: {total_quantity}")
 
+
         elif choice == '3':
             print("\nMaking an order:")
             products = store.get_all_products()
+
             if not products:
                 print("No products available for order.")
                 continue
 
             shopping_list = []
-            shipping_added = False  #Before any products are added, shipping hasn't been selected.
+            shipping_added = False  # Before any products are added, shipping hasn't been selected.
 
             while True:
                 print("\nAvailable Products:")
                 for idx, product in enumerate(products, 1):
                     print(f"{idx}. {product.show()}")
-                product_choice = input("\nEnter the number of the product you would like to order (Enter empty text to finish): ")
+
+                product_choice = input("\nAttention: multiple inputs of the same product exceeding the inventory will not be set. "
+                                       "\nEnter the number of the product you would like to order (press enter to finalize): ")
+
                 # If user enters empty input, finish the order process
                 if not product_choice:
+                    if not shipping_added:  # If shipping hasn't been added, add it automatically
+                        shipping_product = next((p for p in products if p.name == "Shipping"), None)
+                        if shipping_product:
+                            shopping_list.append((shipping_product, 1))  # Add one shipping product
+                            print("__________\nShipping has been added automatically to your order.")
                     break
 
                 try:
                     product_choice = int(product_choice)
                     if 1 <= product_choice <= len(products):
                         product = products[product_choice - 1]
-
                     else:
                         print("Invalid product number. Please select a valid option.")
                         continue
@@ -75,11 +84,10 @@ def start(store):
                     if shipping_added:
                         print("Shipping has already been added to your order.")
                         continue
-                    # Automatically add LimitedProduct (like Shipping) with a quantity of 1
 
+                    # Automatically add LimitedProduct with a quantity of 1
                     shopping_list.append((product, 1))  # Add it as 1 since it's limited
                     shipping_added = True  # Setting shipping to True to prevent adding again
-
                     print(f"Product {product.name} added to list!")
                     continue  # continue product selection
 
@@ -95,7 +103,7 @@ def start(store):
                             break
 
                         except ValueError as e:
-                            print(e)  # Print the error message
+                            print("Invalid input. Please enter a valid quantity.")
 
                 else:
                     # For regular stocked products
@@ -110,8 +118,7 @@ def start(store):
 
                             if quantity > product.get_quantity():
                                 print(f"Unfortunately, we currently have {product.get_quantity()} in stock.")
-                                reconsider = input(
-                                    "Would you like to reconsider the amount? (yes or no): ").strip().lower()
+                                reconsider = input("Would you like to reconsider the amount? (yes or no): ").strip().lower()
                                 if reconsider != 'yes':
                                     break
 
@@ -120,12 +127,15 @@ def start(store):
                                 print(f"Product {product.name} added to list!")
                                 break
 
-                        except ValueError as e:
-                            print(e)  # Print the error message
+                        except ValueError:
+                            print("Invalid input. Please enter a valid quantity.")
 
             if shopping_list:
                 total_price = store.order(shopping_list)
-                print(f"\nTotal price for the order: {total_price} dollars")
+
+                print(f"__________\nTotal price for the order: {total_price} $.")
+
+
 
         elif choice == '4':
             print("Best Buy says Goodbye!")
