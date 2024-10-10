@@ -1,41 +1,55 @@
 class Promotion:
+    """Base class for promotions."""
     def __init__(self, name: str):
+        """Initialize promotion with name."""
         self.name = name
 
+
     def apply_promotion(self, product, quantity) -> float:
+        """Apply promotion logic to product and quantity."""
         raise NotImplementedError("Subclasses must implement this method.")
 
 
 class SecondHalfPrice(Promotion):
-    """promo for 2nd product half price"""
+    """Promotion: buy two, get the second one half-price."""
     def apply_promotion(self, product, quantity) -> float:
-        # Assuming this promotion applies to the entire quantity
-        return (product.price / 2) * quantity
+        """Apply the second half-price promotion."""
+        if quantity == 1:
+            return product.price
+        elif quantity % 2 == 0:
+            # If even number, half of them are full price, half are half price
+            return (quantity // 2) * product.price + (quantity // 2) * (product.price / 2)
+        else:
+            # If odd number, apply half price to (quantity-1) and full price to 1 unit
+            return ((quantity // 2) * product.price + (quantity // 2) * (product.price / 2)) + product.price
 
 
 class ThirdOneFree(Promotion):
-    """promo for the 3rd item for free"""
+    """Promotion: buy two, get the third one free."""
     def apply_promotion(self, product, quantity) -> float:
-        free_units = quantity // 3  # Gets the number of free items
+        """Apply the third-one-free promotion."""
+        free_units = quantity // 3  # Get the number of free items
         total_units_to_pay = quantity - free_units
         return product.price * total_units_to_pay
 
 
 class PercentDiscount(Promotion):
-    """ % off discount"""
+    """Promotion: percentage discount."""
     def __init__(self, name: str, percent: float):
+        """Initialize percentage discount promotion."""
         super().__init__(name)
         self.percent = percent
 
 
     def apply_promotion(self, product, quantity) -> float:
+        """Apply the percent discount."""
         return (product.price * (1 - self.percent / 100)) * quantity
 
 
-
 class Product:
+    """Represents a product with a price and quantity."""
     def __init__(self, name: str, price: float, quantity: int, is_non_stocked: bool = False):
-        """Validate the product name (cannot be empty)"""
+        """Initialize the product."""
         if not name:
             raise ValueError("Product name cannot be empty.")
 
@@ -53,84 +67,96 @@ class Product:
 
 
     def get_quantity(self) -> int:
-        """gets quantity"""
+        """Return the quantity of the product."""
         return self.quantity
 
 
     def set_quantity(self, quantity: int):
-        """sets the quantity"""
+        """Set the quantity and update the product's active status."""
         self.quantity = quantity
         self._update_active_status()
 
 
+    def set_promotion(self, promotion):
+        """Set the promotion for the product."""
+        self.promotion = promotion
+
+
     def is_active(self) -> bool:
-        """checks that its active"""
+        """Return whether the product is active."""
         return self.active
 
 
     def activate(self):
-        """activates products"""
+        """Activate the product."""
         self.active = True
 
 
     def deactivate(self):
-        """deactivates products"""
+        """Deactivate the product if out of stock."""
         self.active = False
 
 
     def _update_active_status(self):
-        """method to deactivate if quantity is 0"""
+        """Update the product's active status based on quantity."""
         if self.quantity == 0:
             self.deactivate()
         else:
             self.activate()
 
 
-    def show(self) -> str:
-        """to show the promotion of each product"""
-        promotion_info = f", Promotion: {self.promotion.name}" if self.promotion else ""
-        return f"{self.name}, Price: {self.price:.2f}{promotion_info}, Quantity: {self.quantity}"
+    def show(self):
+        """Show product details including the current promotion."""
+        quantity_display = f"Quantity: {self.get_quantity()}" if not isinstance(self, NonStockedProduct) else "Quantity: not specified"
+        promo_display = f", Promotion: {self.promotion.name}" if self.promotion else ""
+        return f"{self.name}, Price: {self.price:.2f}{promo_display}, {quantity_display}"
 
 
     def buy(self, quantity: int) -> float:
         """Calculate the total price after applying any promotions."""
         if self.quantity < quantity:
             raise ValueError(f"Not enough quantity available. Only {self.quantity} left in stock.")
+
         # Calculate price based on promotion if it exists
         if self.promotion:
             discounted_price = self.promotion.apply_promotion(self, quantity)
-            self.quantity -= quantity
-            self._update_active_status()
-            return discounted_price
+        else:
+            discounted_price = self.price * quantity
 
         self.quantity -= quantity
         self._update_active_status()
-        return self.price * quantity
+
+        return discounted_price
 
 
 class NonStockedProduct(Product):
-    """Non-Stocked Product class"""
+    """Non-stocked product class."""
     def __init__(self, name: str, price: float):
-        super().__init__(name, price, quantity=0, is_non_stocked=True)   #quantity to 0 and mark as non-stocked
+        """Initialize a non-stocked product."""
+        super().__init__(name, price, quantity=0, is_non_stocked=True)
+
 
     def show(self) -> str:
-        return f"{self.name} (Non-Stocked), Price: {self.price}, Quantity: not specified"
+        """Show non-stocked product with promotion if available."""
+        promo_display = f", Promotion: {self.promotion.name}" if self.promotion else ""
+        return f"{self.name} (Non-Stocked), Price: {self.price}{promo_display}, Quantity: not specified"
 
 
 class LimitedProduct(Product):
-    """Limited Quantity Product class"""
+    """Limited quantity product class."""
     def __init__(self, name: str, price: float, quantity: int, maximum: int):
+        """Initialize a limited quantity product."""
         super().__init__(name, price, quantity)
         self.maximum = maximum
 
 
     def buy(self, quantity: int) -> float:
-        """Check if the quantity exceeds the maximum allowed per order"""
+        """Check if the quantity exceeds the maximum allowed per order."""
         if quantity > self.maximum:
             raise ValueError(f"Cannot purchase more than {self.maximum} of {self.name}.")
         return super().buy(quantity)
 
 
     def show(self) -> str:
-        """Indicate the maximum purchase limit"""
+        """Indicate the maximum purchase limit."""
         return f"{self.name}, Price: {self.price}, Quantity: {self.quantity}, Maximum: {self.maximum}"
