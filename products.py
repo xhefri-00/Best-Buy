@@ -136,6 +136,15 @@ class NonStockedProduct(Product):
         super().__init__(name, price, quantity=0, is_non_stocked=True)
 
 
+    def buy(self, quantity):
+        """Override buy method for NonStockedProduct to skip stock check."""
+        # Apply promotion if there is one
+        if self.promotion:
+            return self.promotion.apply_promotion(self, quantity)
+        else:
+            return self.price * quantity  # No promotion, return regular price
+
+
     def show(self) -> str:
         """Show non-stocked product with promotion if available."""
         promo_display = f", Promotion: {self.promotion.name}" if self.promotion else ""
